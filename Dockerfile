@@ -3,8 +3,9 @@ FROM debian:stable-slim as build
 
 # Configure base image
 RUN apt-get update
-RUN apt-get install wget
-RUN apt-get install xz-utils
+RUN apt-get install -y wget \
+                       xz-utils
+# Clean up
 RUN rm -rf /var/lib/apt/lists/*
 
 # Install Salesforce CLI binary
