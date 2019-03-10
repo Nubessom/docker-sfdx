@@ -11,7 +11,7 @@ RUN rm -rf /var/lib/apt/lists/*
 # Install Salesforce CLI binary
 WORKDIR /
 RUN mkdir /sfdx
-RUN wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1 \
+RUN wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1
 RUN /sfdx/install
 RUN rm -rf /sfdx
 
