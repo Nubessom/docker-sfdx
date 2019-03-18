@@ -2,10 +2,9 @@
 FROM debian:stable-slim as build
 
 # Configure base image
-RUN apt-get update
-RUN apt-get install -y wget \
-                       xz-utils \
-                       openssl
+RUN apt-get update && apt-get install -y wget \
+                                         xz-utils \
+                                         openssl
                        
 # Clean up
 RUN rm -rf /var/lib/apt/lists/*
