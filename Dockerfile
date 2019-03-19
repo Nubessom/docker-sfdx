@@ -3,8 +3,7 @@ FROM debian:stable-slim as build
 
 # Configure base image
 RUN apt-get update && apt-get install -y wget \
-                                         xz-utils \
-                                         openssl
+                                         xz-utils
                        
 # Clean up
 RUN rm -rf /var/lib/apt/lists/*
@@ -19,6 +18,12 @@ RUN rm -rf /sfdx
 ### LAST STAGE
 FROM debian:stable-slim as run
 ###
+
+# Install openssl for key decryption
+RUN apt-get update && apt-get install -y openssl
+
+# Clean up
+RUN rm -rf /var/lib/apt/lists/*
 
 # Setup CLI exports
 ENV SFDX_AUTOUPDATE_DISABLE=false \
