@@ -3,12 +3,7 @@ FROM debian:stable-slim as build
 
 # Configure base image
 RUN apt-get update && apt-get install -y wget \
-                                         xz-utils \
-                                         curl
-                                         
-RUN curl -sL https://deb.nodesource.com/setup_13.x | bash -
-RUN apt-get -y install nodejs
-RUN npm install
+                                         xz-utils
 
 # Clean up
 RUN rm -rf /var/lib/apt/lists/*
