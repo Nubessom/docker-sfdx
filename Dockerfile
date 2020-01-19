@@ -32,3 +32,5 @@ ENV SFDX_AUTOUPDATE_DISABLE=false \
     SFDX_LOG_LEVEL=DEBUG \
     TERM=xterm-256color
 
+COPY --from=build /usr/local/lib/sfdx /usr/local/lib/sfdx
+RUN ln -sf /usr/local/lib/sfdx/bin/sfdx /usr/local/bin/sfdx
