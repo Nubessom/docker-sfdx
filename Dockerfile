@@ -14,6 +14,7 @@ RUN mkdir /sfdx
 RUN wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1
 RUN /sfdx/install
 RUN rm -rf /sfdx
+RUN sfdx plugins:install salesforcedx@latest
 
 ### LAST STAGE
 FROM debian:stable-slim as run
