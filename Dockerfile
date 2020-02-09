@@ -21,7 +21,7 @@ FROM debian:stable-slim as run
 
 # Install openssl for key decryption
 RUN apt-get update && apt-get install -y openssl \
-                                         curl
+                                         jq
 
 # Clean up
 RUN rm -rf /var/lib/apt/lists/*
@@ -31,6 +31,8 @@ ENV SFDX_AUTOUPDATE_DISABLE=false \
     SFDX_DOMAIN_RETRY=300 \
     SFDX_DISABLE_APP_HUB=true \
     SFDX_LOG_LEVEL=DEBUG \
+    SFDX_PROJECT_AUTOUPDATE_DISABLE_FOR_PACKAGE_CREATE=TRUE \
+    SFDX_PROJECT_AUTOUPDATE_DISABLE_FOR_PACKAGE_VERSION_CREATE=true \
     TERM=xterm-256color
 
 COPY --from=build /usr/local/lib/sfdx /usr/local/lib/sfdx
