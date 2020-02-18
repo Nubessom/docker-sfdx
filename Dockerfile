@@ -22,7 +22,8 @@ FROM debian:stable-slim as run
 # Install openssl for key decryption
 RUN apt-get update && apt-get install -y openssl \
                                          jq \
-                                         curl
+                                         curl \
+                                         git
 
 # Clean up
 RUN rm -rf /var/lib/apt/lists/*
