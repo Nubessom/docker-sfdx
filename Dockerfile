@@ -2,11 +2,15 @@
 FROM debian:stable-slim as build
 
 # Configure base image
-RUN apt-get update && apt-get install -y wget \
-                                         xz-utils
+RUN apt-get update \
+    && apt-get install --assume-yes wget \
+                                    xz-utils
+                                         
                        
 # Clean up
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get autoremove --assume-yes \
+    && apt-get clean --assume-yes \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Salesforce CLI binary
 WORKDIR /
@@ -15,18 +19,25 @@ RUN wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-a
 RUN /sfdx/install
 RUN rm -rf /sfdx
 
+# Install sfdx scanner plagin - https://forcedotcom.github.io/sfdx-scanner/
+RUN sfdx plugins:install @salesforce/sfdx-scanner
+
 ### LAST STAGE
 FROM debian:stable-slim as run
 ###
 
 # Install openssl for key decryption
-RUN apt-get update && apt-get install -y openssl \
-                                         jq \
-                                         curl \
-                                         git
+RUN apt-get update \
+    && apt-get install --assume-yes openssl \
+                                    jq \
+                                    curl \
+                                    git \
+                                    openjdk-11-jdk-headless
 
 # Clean up
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get autoremove --assume-yes \
+    && apt-get clean --assume-yes \
+    && rm -rf /var/lib/apt/lists/*
 
 # Setup CLI exports
 ENV SFDX_AUTOUPDATE_DISABLE=false \
@@ -40,7 +51,10 @@ ENV SFDX_AUTOUPDATE_DISABLE=false \
 
 COPY --from=build /usr/local/lib/sfdx /usr/local/lib/sfdx
 RUN ln -sf /usr/local/lib/sfdx/bin/sfdx /usr/local/bin/sfdx
+
+# Make sure we have latest SFDX version and all related plugins
 RUN sfdx update
+RUN sfdx plugins:update
 
 # Show version of Salesforce CLI
 RUN sfdx --version && sfdx plugins --core
