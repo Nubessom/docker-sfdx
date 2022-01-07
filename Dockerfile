@@ -14,13 +14,12 @@ RUN apt-get autoremove --assume-yes \
 
 # Install Salesforce CLI binary
 WORKDIR /
-RUN mkdir /sfdx
-RUN wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1
-RUN /sfdx/install
-RUN rm -rf /sfdx
+RUN mkdir -p /usr/local/lib/sfdx
+RUN wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz | tar xJ -C /usr/local/lib/sfdx --strip-components 1
+RUN ln -sf /usr/local/lib/sfdx/bin/sfdx /usr/local/bin/sfdx
 
-# Install sfdx scanner plagin - https://forcedotcom.github.io/sfdx-scanner/
-RUN sfdx plugins:install @salesforce/sfdx-scanner
+# Make sure we have latest SFDX version and all related plugins
+RUN sfdx update
 
 ### LAST STAGE
 FROM debian:stable-slim as run
@@ -49,12 +48,12 @@ ENV SFDX_AUTOUPDATE_DISABLE=false \
     SFDX_DISABLE_TELEMETRY=true \
     TERM=xterm-256color
 
+#Move SFDX CLI from BUILD stage
 COPY --from=build /usr/local/lib/sfdx /usr/local/lib/sfdx
 RUN ln -sf /usr/local/lib/sfdx/bin/sfdx /usr/local/bin/sfdx
 
-# Make sure we have latest SFDX version and all related plugins
-RUN sfdx update
-RUN sfdx plugins:update
+# Install sfdx scanner plagin - https://forcedotcom.github.io/sfdx-scanner/
+RUN sfdx plugins:install @salesforce/sfdx-scanner
 
 # Show version of Salesforce CLI
 RUN sfdx --version && sfdx plugins --core
