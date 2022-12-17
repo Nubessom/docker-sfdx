@@ -55,5 +55,8 @@ RUN ln -sf /usr/local/lib/sfdx/bin/sfdx /usr/local/bin/sfdx
 # Install sfdx scanner plagin - https://forcedotcom.github.io/sfdx-scanner/
 RUN sfdx plugins:install @salesforce/sfdx-scanner
 
+# install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
+RUN echo y | sfdx plugins:install sfdx-git-delta
+
 # Show version of Salesforce CLI
 RUN sfdx --version && sfdx plugins --core
