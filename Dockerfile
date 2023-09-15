@@ -14,12 +14,9 @@ RUN apt-get autoremove --assume-yes \
 
 # Install Salesforce CLI binary
 WORKDIR /
-RUN mkdir -p /usr/local/lib/sfdx
-RUN wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz | tar xJ -C /usr/local/lib/sfdx --strip-components 1
-RUN ln -sf /usr/local/lib/sfdx/bin/sfdx /usr/local/bin/sfdx
+RUN mkdir -p /usr/local/cli/sf 
+RUN wget -qO- https://developer.salesforce.com/media/salesforce-cli/sf/channels/stable/sf-linux-x64.tar.xz | tar xJ -C /usr/local/cli/sf --strip-components 1
 
-# Make sure we have latest SFDX version and all related plugins
-RUN sfdx update
 
 ### LAST STAGE
 FROM debian:stable-slim as run
@@ -28,10 +25,11 @@ FROM debian:stable-slim as run
 # Install openssl for key decryption
 RUN apt-get update \
     && apt-get install --assume-yes openssl \
+				    ca-certificates-java \
                                     jq \
                                     curl \
                                     git \
-                                    openjdk-11-jdk-headless
+                                    openjdk-17-jdk-headless
 
 # Clean up
 RUN apt-get autoremove --assume-yes \
@@ -39,24 +37,28 @@ RUN apt-get autoremove --assume-yes \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup CLI exports
-ENV SFDX_AUTOUPDATE_DISABLE=false \
-    SFDX_DOMAIN_RETRY=300 \
-    SFDX_DISABLE_APP_HUB=true \
-    SFDX_LOG_LEVEL=DEBUG \
-    SFDX_PROJECT_AUTOUPDATE_DISABLE_FOR_PACKAGE_CREATE=true \
-    SFDX_PROJECT_AUTOUPDATE_DISABLE_FOR_PACKAGE_VERSION_CREATE=true \
-    SFDX_DISABLE_TELEMETRY=true \
+ENV SF_AUTOUPDATE_DISABLE=false \
+    SF_DOMAIN_RETRY=300 \
+    SF_LOG_LEVEL=debug \
+    SF_PROJECT_AUTOUPDATE_DISABLE_FOR_PACKAGE_CREATE=true \
+    SF_PROJECT_AUTOUPDATE_DISABLE_FOR_PACKAGE_VERSION_CREATE=true \
+    SF_DISABLE_TELEMETRY=true \
     TERM=xterm-256color
 
-#Move SFDX CLI from BUILD stage
-COPY --from=build /usr/local/lib/sfdx /usr/local/lib/sfdx
-RUN ln -sf /usr/local/lib/sfdx/bin/sfdx /usr/local/bin/sfdx
+ENV PATH=/usr/local/cli/sf/bin:$PATH
+
+#Move SF CLI from BUILD stage
+COPY --from=build /usr/local/cli/sf /usr/local/cli/sf
+
+# Installing CLI Plugins for Packaging - https://github.com/salesforcecli/plugin-packaging
+RUN sf plugins install @salesforce/plugin-packaging
 
 # Install sfdx scanner plagin - https://forcedotcom.github.io/sfdx-scanner/
-RUN sfdx plugins:install @salesforce/sfdx-scanner
+RUN sf plugins install @salesforce/sfdx-scanner
 
 # install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
-RUN echo y | sfdx plugins:install sfdx-git-delta
+RUN echo y | sf plugins install sfdx-git-delta
 
 # Show version of Salesforce CLI
-RUN sfdx --version && sfdx plugins --core
+RUN sf --version && sf plugins --core
+
